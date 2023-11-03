@@ -17,24 +17,31 @@ const dataArray = new Uint8Array(bufferLength);
 canvas.width = document.querySelector('.container').clientWidth - 32;
 canvas.height = window.innerHeight * 0.8;
 
+const history = [];
+
 function draw() {
     requestAnimationFrame(draw);
-
     analyser.getByteFrequencyData(dataArray);
+    const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+    history.push(averageVolume);
+
+    if (history.length > canvas.width * 0.65) history.shift();
 
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const barWidth = 4; // Width of each bar
-    const barSpacing = 6; // Space between each bar
+    const barWidth = 4;
+    const barSpacing = 6;
 
-    for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 256) * canvas.height;
-        const x = i * (barWidth + barSpacing);
-        const y = canvas.height - barHeight;
+    for (let h = 0; h < history.length; h++) {
+        const x = h * (barWidth + barSpacing);
+        const height = (history[h] / 256) * canvas.height;
+        const halfHeight = height / 2;
+        const y = canvas.height / 2;
 
         ctx.fillStyle = '#FD8775';
-        ctx.fillRect(x, y, barWidth, barHeight);
+        ctx.fillRect(x, y - halfHeight, barWidth, halfHeight);
+        ctx.fillRect(x, y, barWidth, halfHeight);
     }
 }
 
