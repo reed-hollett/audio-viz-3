@@ -34,25 +34,17 @@ function draw() {
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#FD8775';
 
-    ctx.beginPath();
-    for (let h = 1; h < history.length; h++) {
+    for (let h = 0; h < history.length; h++) {
         const x = h;
-        const prevX = h - 1;
         const height = (history[h] / 256) * canvas.height;
-        const prevHeight = (history[prevX] / 256) * canvas.height;
+        const halfHeight = height / 2;
+        const y = canvas.height / 2;
 
-        const y = canvas.height / 2 - height / 2;
-        const prevY = canvas.height / 2 - prevHeight / 2;
-
-        const cp1x = prevX;
-        const cp1y = prevY;
-        const cp2x = prevX + (x - prevX) / 2;
-        const cp2y = prevY + (y - prevY) / 2;
-
-        ctx.moveTo(prevX, prevY);
-        ctx.quadraticCurveTo(cp1x, cp1y, cp2x, cp2y);
+        ctx.beginPath();
+        ctx.moveTo(x, y - halfHeight);
+        ctx.lineTo(x, y + halfHeight);
+        ctx.stroke();
     }
-    ctx.stroke();
 }
 
 playButton.addEventListener('click', function() {
