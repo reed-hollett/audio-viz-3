@@ -34,6 +34,7 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw the inner blended strokes
     for (let offset = 10; offset > 0; offset--) {
         ctx.lineWidth = offset * 2;
         const opacity = 1 - (offset / 10);
@@ -52,6 +53,7 @@ function draw() {
         }
     }
 
+    // Draw the main waveform
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#FD8775';
 

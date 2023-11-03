@@ -1,50 +1,49 @@
-@font-face {
-    font-family: 'GoogleSans';
-    src: url('GoogleSans-Regular.ttf') format('truetype');
-}
-
 body {
     background-color: white;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
     margin: 0;
+    font-family: 'Google Sans', sans-serif;
+}
+
+@font-face {
+    font-family: 'Google Sans';
+    src: url('GoogleSans-Regular.ttf') format('truetype');
 }
 
 .container {
     background-color: #F0E7DE;
+    padding: 20px;
     border-radius: 24px;
-    padding: 16px;
+    text-align: center;
     position: relative;
 }
 
 canvas {
-    display: block;
     background-color: #F0E7DE;
+    display: block;
 }
 
 .controls {
-    position: absolute;
-    bottom: 16px;
-    width: calc(100% - 32px);
-    text-align: center;
+    margin-top: 16px;
 }
 
 .pill {
-    font-family: 'GoogleSans', sans-serif;
     background-color: #DE3730;
     color: white;
-    padding: 10px 20px;
     border: none;
+    padding: 8px 16px;
     border-radius: 50px;
     cursor: pointer;
-    margin-right: 10px;
+    font-family: 'Google Sans', sans-serif;
 }
 
 .monospace {
-    font-family: monospace;
+    font-family: 'Courier New', Courier, monospace;
     color: #DE3730;
+    margin-left: 8px;
 }
 
 .dropdown {
@@ -61,7 +60,6 @@ canvas {
 }
 
 .dropdown-content a {
-    font-family: 'GoogleSans', sans-serif;
     color: black;
     padding: 12px 16px;
     text-decoration: none;
@@ -78,4 +76,5 @@ canvas {
 
 .dropdown-button {
     background-color: rgba(255, 255, 255, 0.9);
+    font-family: 'Google Sans', sans-serif;
 }
