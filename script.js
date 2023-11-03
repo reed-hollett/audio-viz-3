@@ -25,7 +25,7 @@ function draw() {
 
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
-    if (history.length > canvas.width / 2) history.shift();
+    if (history.length > canvas.width) history.shift(); // Adjusted to use the entire width
 
     ctx.fillStyle = 'rgba(0, 0, 0, 1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -34,8 +34,8 @@ function draw() {
     ctx.strokeStyle = '#00FF00';
 
     for (let h = 0; h < history.length; h++) {
-        const x = canvas.width / 2 + h; // Start from the center and scroll to the right
-        const height = history[h] / 2; // Adjusting the height for better visibility
+        const x = h; // Start from the left
+        const height = (history[h] / 256) * canvas.height; // Scaling to the full canvas height
         const y = canvas.height / 2 - height / 2; // Centering vertically
 
         ctx.beginPath();
