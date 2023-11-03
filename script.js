@@ -17,34 +17,24 @@ const dataArray = new Uint8Array(bufferLength);
 canvas.width = document.querySelector('.container').clientWidth - 32;
 canvas.height = window.innerHeight * 0.8;
 
-const history = [];
-
 function draw() {
     requestAnimationFrame(draw);
 
     analyser.getByteFrequencyData(dataArray);
 
-    const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
-    history.push(averageVolume);
-    if (history.length > canvas.width * 0.65) history.shift();
-
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw the main waveform
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#FD8775';
+    const barWidth = 4; // Width of each bar
+    const barSpacing = 6; // Space between each bar
 
-    for (let h = 0; h < history.length; h++) {
-        const x = h;
-        const height = (history[h] / 256) * canvas.height;
-        const halfHeight = height / 2;
-        const y = canvas.height / 2;
+    for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 256) * canvas.height;
+        const x = i * (barWidth + barSpacing);
+        const y = canvas.height - barHeight;
 
-        ctx.beginPath();
-        ctx.moveTo(x, y - halfHeight);
-        ctx.lineTo(x, y + halfHeight);
-        ctx.stroke();
+        ctx.fillStyle = '#FD8775';
+        ctx.fillRect(x, y, barWidth, barHeight);
     }
 }
 
