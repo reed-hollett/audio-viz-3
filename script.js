@@ -28,22 +28,31 @@ function draw() {
     history.push(averageVolume);
     if (history.length > canvas.width * 0.65) history.shift();
 
-    ctx.fillStyle = '#F0E7DE';  // Changed from white to match the container
+    ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#FD8775';  // Waveform color
+    ctx.strokeStyle = '#FD8775';
 
-    for (let h = 0; h < history.length; h++) {
+    ctx.beginPath();
+    for (let h = 1; h < history.length; h++) {
         const x = h;
+        const prevX = h - 1;
         const height = (history[h] / 256) * canvas.height;
-        const y = canvas.height / 2 - height / 2;
+        const prevHeight = (history[prevX] / 256) * canvas.height;
 
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + height);
-        ctx.stroke();
+        const y = canvas.height / 2 - height / 2;
+        const prevY = canvas.height / 2 - prevHeight / 2;
+
+        const cp1x = prevX;
+        const cp1y = prevY;
+        const cp2x = prevX + (x - prevX) / 2;
+        const cp2y = prevY + (y - prevY) / 2;
+
+        ctx.moveTo(prevX, prevY);
+        ctx.quadraticCurveTo(cp1x, cp1y, cp2x, cp2y);
     }
+    ctx.stroke();
 }
 
 playButton.addEventListener('click', function() {
@@ -56,7 +65,7 @@ playButton.addEventListener('click', function() {
 audio.addEventListener('timeupdate', function() {
     const currentTime = audio.currentTime;
     const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
-    const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');  // Changed to show hundredths of a second
+    const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');
     timeCounter.textContent = `• ${minutes}:${seconds}`;
 });
 
