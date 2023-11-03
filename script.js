@@ -25,7 +25,7 @@ function draw() {
 
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
-    if (history.length > canvas.width * 0.8) history.shift(); // Adjusted to start shifting at 80%
+    if (history.length > canvas.width * 0.65) history.shift(); // Adjusted to start shifting at 65%
 
     ctx.fillStyle = 'rgba(0, 0, 0, 1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
