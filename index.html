@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Visualizer</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <audio id="audio" src="frank-dukes.mp3"></audio>
         <canvas id="canvas"></canvas>
         <div class="controls">
-            <button id="playButton">Play</button>
-            <span id="timeCounter">• 00.0</span>
+            <button id="playButton" class="pill">Play</button>
+            <span id="timeCounter" class="monospace">• 00:00.00</span>
+            <div class="dropdown">
+                <button class="pill dropdown-button">frank-dukes.mp3</button>
+                <div class="dropdown-content">
+                    <a href="#" id="file1">frank-dukes.mp3</a>
+                    <a href="#" id="file2">ssaliva.mp3</a>
+                </div>
+            </div>
         </div>
+        <audio id="audio" src="frank-dukes.mp3"></audio>
     </div>
     <script src="script.js"></script>
 </body>

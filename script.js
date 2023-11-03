@@ -3,6 +3,9 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const playButton = document.getElementById('playButton');
 const timeCounter = document.getElementById('timeCounter');
+const dropdownButton = document.querySelector('.dropdown-button');
+const file1 = document.getElementById('file1');
+const file2 = document.getElementById('file2');
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const analyser = audioContext.createAnalyser();
@@ -31,7 +34,6 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw the inner blended strokes
     for (let offset = 10; offset > 0; offset--) {
         ctx.lineWidth = offset * 2;
         const opacity = 1 - (offset / 10);
@@ -50,7 +52,6 @@ function draw() {
         }
     }
 
-    // Draw the main waveform
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#FD8775';
 
@@ -67,11 +68,35 @@ function draw() {
     }
 }
 
-playButton.addEventListener('click', function() {
-    audioContext.resume().then(() => {
-        audio.play();
-        draw();
-    });
+function playPauseAudio() {
+    if (audio.paused) {
+        audioContext.resume().then(() => {
+            audio.play();
+            draw();
+            playButton.innerText = 'Pause';
+        });
+    } else {
+        audio.pause();
+        playButton.innerText = 'Play';
+    }
+}
+
+playButton.addEventListener('click', playPauseAudio);
+
+file1.addEventListener('click', function() {
+    if (audio.src !== 'frank-dukes.mp3') {
+        audio.src = 'frank-dukes.mp3';
+        dropdownButton.innerText = 'frank-dukes.mp3';
+        playPauseAudio();
+    }
+});
+
+file2.addEventListener('click', function() {
+    if (audio.src !== 'ssaliva.mp3') {
+        audio.src = 'ssaliva.mp3';
+        dropdownButton.innerText = 'ssaliva.mp3';
+        playPauseAudio();
+    }
 });
 
 audio.addEventListener('timeupdate', function() {
