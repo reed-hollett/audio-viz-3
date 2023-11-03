@@ -25,7 +25,7 @@ function draw() {
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
 
-    const barWidth = 6;  // Increased thickness of lines
+    const barWidth = 20;  // Increased thickness of lines
     const barSpacing = 8;
     const totalBarSpace = barWidth + barSpacing;
 
