@@ -9,37 +9,44 @@ const source = audioContext.createMediaElementSource(audio);
 source.connect(analyser);
 analyser.connect(audioContext.destination);
 
-analyser.fftSize = 256;
-const bufferLength = analyser.frequencyBinCount;
-const dataArray = new Uint8Array(bufferLength);
+analyser.fftSize = 2048;
+const bufferLength = analyser.fftSize;
+const dataArray = new Float32Array(bufferLength);
 
 canvas.width = window.innerWidth;
-canvas.height = 400;
+canvas.height = window.innerHeight;
 
 function draw() {
     requestAnimationFrame(draw);
 
-    analyser.getByteFrequencyData(dataArray);
+    analyser.getFloatTimeDomainData(dataArray);
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const barWidth = (canvas.width / bufferLength);
-    let barHeight;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgb(0, 255, 0)';
+
+    ctx.beginPath();
+
+    const sliceWidth = canvas.width * 1.0 / bufferLength;
     let x = 0;
 
     for (let i = 0; i < bufferLength; i++) {
-        barHeight = dataArray[i] * 2;
+        const v = dataArray[i] * 0.5;
+        const y = v * canvas.height / 2;
 
-        const r = barHeight + (25 * (i / bufferLength));
-        const g = 250 * (i / bufferLength);
-        const b = 50;
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
 
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
-        x += barWidth + 1;
+        x += sliceWidth;
     }
+
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
 }
 
 playButton.addEventListener('click', function() {
