@@ -29,7 +29,6 @@ function draw() {
     history.push(averageVolume);
 
     if (history.length > (canvas.width * 0.65) / totalBarSpace) {
-        // Slow down the scrolling of the waveform
         if (history.length % 2 === 0) history.shift();
     }
 
@@ -54,12 +53,15 @@ function draw() {
     }
 }
 
-playButton.addEventListener('click', function() {
+function startAudio() {
     audioContext.resume().then(() => {
         audio.play();
         draw();
     });
-});
+}
+
+playButton.addEventListener('click', startAudio);
+playButton.addEventListener('touchend', startAudio);
 
 audio.addEventListener('timeupdate', function() {
     const currentTime = audio.currentTime;
