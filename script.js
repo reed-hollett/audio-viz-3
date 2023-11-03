@@ -25,8 +25,8 @@ function draw() {
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
 
-    const barWidth = 3;
-    const barSpacing = 5;
+    const barWidth = 6;  // Increased thickness of lines
+    const barSpacing = 8;
     const totalBarSpace = barWidth + barSpacing;
 
     if (history.length > (canvas.width * 0.65) / totalBarSpace) history.shift();
@@ -34,13 +34,15 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.fillStyle = '#FD8775';
+    ctx.lineCap = 'round';  // Rounded endpoints
+
     for (let h = 0; h < history.length; h++) {
         const x = h * totalBarSpace;
         const height = (history[h] / 256) * canvas.height;
         const halfHeight = height / 2;
         const y = canvas.height / 2;
 
-        ctx.fillStyle = '#FD8775';
         ctx.fillRect(x, y - halfHeight, barWidth, halfHeight);
         ctx.fillRect(x, y, barWidth, halfHeight);
     }
