@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waveform Viewer</title>
+    <title>Audio Visualizer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="button-container">
-        <button id="playButton">Play</button>
+    <div class="container">
+        <audio id="audio" src="frank-dukes.mp3"></audio>
+        <canvas id="canvas"></canvas>
+        <div class="controls">
+            <button id="playButton">Play</button>
+            <span id="timeCounter">• 00.0</span>
+        </div>
     </div>
-    <canvas id="canvas"></canvas>
-    <audio id="audio" src="frank-dukes.mp3"></audio>
     <script src="script.js"></script>
 </body>
 </html>

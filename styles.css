@@ -1,36 +1,41 @@
-body, html {
+body {
+    background-color: white;
     margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #000;
+    height: 100vh;
 }
 
-.button-container {
-    z-index: 10;
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end; /* Aligning towards the bottom */
-    width: 100%;
-    height: 100%;
-    padding-bottom: 20px; /* Adding some padding at the bottom */
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
+.container {
+    background-color: #F0E7DE;
+    border-radius: 24px;
+    padding: 16px;
+    position: relative;
 }
 
 canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block;
     width: 100%;
-    height: 100%;
+    height: 80vh;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#playButton {
+    background-color: #DE3730;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+#timeCounter {
+    color: #DE3730;
+    font-family: 'Courier New', monospace;
 }
