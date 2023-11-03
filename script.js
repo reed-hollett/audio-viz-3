@@ -9,22 +9,22 @@ const source = audioContext.createMediaElementSource(audio);
 source.connect(analyser);
 analyser.connect(audioContext.destination);
 
-analyser.fftSize = 2048;
-const bufferLength = analyser.fftSize;
-const dataArray = new Float32Array(bufferLength);
+analyser.fftSize = 256;
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const history = []; // To store past waveforms
+const history = []; // To store past volume levels
 
 function draw() {
     requestAnimationFrame(draw);
 
-    analyser.getFloatTimeDomainData(dataArray);
+    analyser.getByteFrequencyData(dataArray);
 
-    // Push current dataArray into history
-    history.push([...dataArray]);
+    const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
+    history.push(averageVolume);
     if (history.length > canvas.width / 2) history.shift();
 
     ctx.fillStyle = 'rgba(0, 0, 0, 1)';
@@ -34,23 +34,13 @@ function draw() {
     ctx.strokeStyle = '#00FF00';
 
     for (let h = 0; h < history.length; h++) {
+        const x = canvas.width / 2 + h; // Start from the center and scroll to the right
+        const height = history[h] / 2; // Adjusting the height for better visibility
+        const y = canvas.height / 2 - height / 2; // Centering vertically
+
         ctx.beginPath();
-        const sliceWidth = canvas.width * 1.0 / bufferLength;
-        let x = canvas.width / 2 + h - history.length; // Start from the center and scroll to the right
-
-        for (let i = 0; i < bufferLength; i++) {
-            const v = history[h][i] * 200;
-            const y = v + canvas.height / 2;
-
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-            x += sliceWidth;
-        }
-
-        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + height);
         ctx.stroke();
     }
 }
