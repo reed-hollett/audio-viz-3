@@ -12,6 +12,8 @@ body {
     border-radius: 24px;
     padding: 16px;
     position: relative;
+    width: 94%;  /* Reduced margin between container and window */
+    max-width: 1200px;  /* Optional: maximum width for larger screens */
 }
 
 canvas {

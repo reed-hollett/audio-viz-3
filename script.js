@@ -28,11 +28,11 @@ function draw() {
     history.push(averageVolume);
     if (history.length > canvas.width * 0.65) history.shift();
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    ctx.fillStyle = '#F0E7DE';  // Changed from white to match the container
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#FD8775'; // Waveform color
+    ctx.strokeStyle = '#FD8775';  // Waveform color
 
     for (let h = 0; h < history.length; h++) {
         const x = h;
@@ -56,7 +56,7 @@ playButton.addEventListener('click', function() {
 audio.addEventListener('timeupdate', function() {
     const currentTime = audio.currentTime;
     const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
-    const seconds = (currentTime % 60).toFixed(1).padStart(4, '0');
+    const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');  // Changed to show hundredths of a second
     timeCounter.textContent = `• ${minutes}:${seconds}`;
 });
 
