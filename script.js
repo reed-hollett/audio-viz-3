@@ -4,33 +4,38 @@ const ctx = canvas.getContext('2d');
 const playButton = document.getElementById('playButton');
 const timeCounter = document.getElementById('timeCounter');
 
-let started = false;
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const analyser = audioContext.createAnalyser();
+const source = audioContext.createMediaElementSource(audio);
+source.connect(analyser);
+analyser.connect(audioContext.destination);
+
+analyser.fftSize = 256;
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
 
 canvas.width = document.querySelector('.container').clientWidth - 32;
 canvas.height = window.innerHeight * 0.8;
 
 const history = [];
-const barWidth = 6;
-const barSpacing = 8;
-const totalBarSpace = barWidth + barSpacing;
 
-function draw(analyser) {
-    requestAnimationFrame(() => draw(analyser));
-
-    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+function draw() {
+    requestAnimationFrame(draw);
     analyser.getByteFrequencyData(dataArray);
-    
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
 
-    if (history.length > (canvas.width * 0.65) / totalBarSpace) {
-        if (history.length % 2 === 0) history.shift();
-    }
+    const barWidth = 6;  // Increased thickness of lines
+    const barSpacing = 8;
+    const totalBarSpace = barWidth + barSpacing;
+
+    if (history.length > (canvas.width * 0.65) / totalBarSpace) history.shift();
 
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = '#FD8775';
+    ctx.lineCap = 'round';  // Rounded endpoints
 
     for (let h = 0; h < history.length; h++) {
         const x = h * totalBarSpace;
@@ -38,37 +43,16 @@ function draw(analyser) {
         const halfHeight = height / 2;
         const y = canvas.height / 2;
 
-        const path = new Path2D();
-        path.moveTo(x, y - halfHeight);
-        path.lineTo(x + barWidth, y - halfHeight);
-        path.arcTo(x + barWidth, y, x, y, barWidth / 2);
-        path.lineTo(x, y + halfHeight);
-        path.arcTo(x, y, x + barWidth, y, barWidth / 2);
-        ctx.fill(path);
+        ctx.fillRect(x, y - halfHeight, barWidth, halfHeight);
+        ctx.fillRect(x, y, barWidth, halfHeight);
     }
 }
 
 playButton.addEventListener('click', function() {
-    if (!started) {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const analyser = audioContext.createAnalyser();
-        const source = audioContext.createMediaElementSource(audio);
-        source.connect(analyser);
-        analyser.connect(audioContext.destination);
-        analyser.fftSize = 256;
-
-        audioContext.resume().then(() => {
-            audio.play();
-            draw(analyser);
-            started = true;
-        });
-    } else {
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
-        }
-    }
+    audioContext.resume().then(() => {
+        audio.play();
+        draw();
+    });
 });
 
 audio.addEventListener('timeupdate', function() {
