@@ -14,7 +14,7 @@ analyser.fftSize = 256;
 const bufferLength = analyser.frequencyBinCount;
 const dataArray = new Uint8Array(bufferLength);
 
-canvas.width = document.querySelector('.container').clientWidth - 32; // Adjusted for padding
+canvas.width = document.querySelector('.container').clientWidth - 32;
 canvas.height = window.innerHeight * 0.8;
 
 const history = [];
@@ -31,6 +31,26 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw the inner blended strokes
+    for (let offset = 10; offset > 0; offset--) {
+        ctx.lineWidth = offset * 2;
+        const opacity = 1 - (offset / 10);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+
+        for (let h = 0; h < history.length; h++) {
+            const x = h;
+            const height = (history[h] / 256) * canvas.height;
+            const halfHeight = height / 2;
+            const y = canvas.height / 2;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y - halfHeight);
+            ctx.lineTo(x, y + halfHeight);
+            ctx.stroke();
+        }
+    }
+
+    // Draw the main waveform
     ctx.lineWidth = 2;
     ctx.strokeStyle = '#FD8775';
 
