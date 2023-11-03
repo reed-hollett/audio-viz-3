@@ -25,13 +25,13 @@ function draw() {
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
 
-    if (history.length > canvas.width * 0.65) history.shift();
+    if (history.length > canvas.width * 0.65 / (barWidth + barSpacing)) history.shift();
 
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const barWidth = 4;
-    const barSpacing = 6;
+    const barWidth = 10;
+    const barSpacing = 2;
 
     for (let h = 0; h < history.length; h++) {
         const x = h * (barWidth + barSpacing);
