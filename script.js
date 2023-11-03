@@ -1,7 +1,7 @@
-// script.js
 const audio = document.getElementById('audio');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const playButton = document.getElementById('playButton');
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const analyser = audioContext.createAnalyser();
@@ -17,30 +17,39 @@ canvas.width = window.innerWidth;
 canvas.height = 400;
 
 function draw() {
-  requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
 
-  analyser.getByteFrequencyData(dataArray);
+    analyser.getByteFrequencyData(dataArray);
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const barWidth = (canvas.width / bufferLength);
-  let barHeight;
-  let x = 0;
+    const barWidth = (canvas.width / bufferLength);
+    let barHeight;
+    let x = 0;
 
-  for (let i = 0; i < bufferLength; i++) {
-    barHeight = dataArray[i] * 2;
+    for (let i = 0; i < bufferLength; i++) {
+        barHeight = dataArray[i] * 2;
 
-    const r = barHeight + (25 * (i / bufferLength));
-    const g = 250 * (i / bufferLength);
-    const b = 50;
+        const r = barHeight + (25 * (i / bufferLength));
+        const g = 250 * (i / bufferLength);
+        const b = 50;
 
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
-    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
 
-    x += barWidth + 1;
-  }
+        x += barWidth + 1;
+    }
 }
 
-audio.play();
-draw();
+playButton.addEventListener('click', function() {
+    audioContext.resume().then(() => {
+        console.log('Playback resumed');
+        audio.play();
+        draw();
+    });
+});
+
+audio.addEventListener('error', function(e) {
+    console.error('Error encountered:', e);
+});
