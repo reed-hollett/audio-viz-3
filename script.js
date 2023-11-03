@@ -4,15 +4,7 @@ const ctx = canvas.getContext('2d');
 const playButton = document.getElementById('playButton');
 const timeCounter = document.getElementById('timeCounter');
 
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const analyser = audioContext.createAnalyser();
-const source = audioContext.createMediaElementSource(audio);
-source.connect(analyser);
-analyser.connect(audioContext.destination);
-
-analyser.fftSize = 256;
-const bufferLength = analyser.frequencyBinCount;
-const dataArray = new Uint8Array(bufferLength);
+let started = false;
 
 canvas.width = document.querySelector('.container').clientWidth - 32;
 canvas.height = window.innerHeight * 0.8;
@@ -22,9 +14,12 @@ const barWidth = 6;
 const barSpacing = 8;
 const totalBarSpace = barWidth + barSpacing;
 
-function draw() {
-    requestAnimationFrame(draw);
+function draw(analyser) {
+    requestAnimationFrame(() => draw(analyser));
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(dataArray);
+    
     const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
     history.push(averageVolume);
 
@@ -53,15 +48,28 @@ function draw() {
     }
 }
 
-function startAudio() {
-    audioContext.resume().then(() => {
-        audio.play();
-        draw();
-    });
-}
+playButton.addEventListener('click', function() {
+    if (!started) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        analyser.fftSize = 256;
 
-playButton.addEventListener('click', startAudio);
-playButton.addEventListener('touchend', startAudio);
+        audioContext.resume().then(() => {
+            audio.play();
+            draw(analyser);
+            started = true;
+        });
+    } else {
+        if (audio.paused) {
+            audio.play();
+        } else {
+            audio.pause();
+        }
+    }
+});
 
 audio.addEventListener('timeupdate', function() {
     const currentTime = audio.currentTime;
