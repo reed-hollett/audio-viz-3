@@ -30,12 +30,16 @@ function drawCascadingWave() {
     ctx.fillStyle = '#F0E7DE'; // Background color
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw each frame of the trail, with each one being more transparent and lighter in color
+    // Draw each frame of the trail, with each one being more transparent and featuring a color from the range
     trail.forEach((frame, index) => {
         const alpha = (1 - index / maxTrail).toFixed(2);
-        const redValue = 220 - (index / maxTrail) * 30; // Red component slightly decreases
-        const greenValue = Math.max(0, 50 - (index / maxTrail) * 50); // Green starts low and fades out
-        const blueValue = Math.max(0, 30 - (index / maxTrail) * 30); // Blue starts very low and fades out
+        
+        // Interpolate color from light red to beige/reds to burgundy
+        // Note: Adjust the values below to fine-tune the color range
+        const redValue = 205 + (index / maxTrail) * (255 - 205); // Start with light red and transition to darker
+        const greenValue = 150 - (index / maxTrail) * (150 - 0); // Green component decreases to transition to reds
+        const blueValue = 150 - (index / maxTrail) * (150 - 0); // Blue component decreases similarly
+        
         ctx.strokeStyle = `rgba(${redValue}, ${greenValue}, ${blueValue}, ${alpha})`;
         ctx.lineWidth = 10; // Width of the waveform lines
 
