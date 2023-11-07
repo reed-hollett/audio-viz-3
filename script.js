@@ -17,7 +17,7 @@ const dataArray = new Uint8Array(bufferLength);
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight * 0.8;
 
-const maxTrail = 10; // Maximum number of trailing strokes
+const maxTrail = 50; // Maximum number of trailing strokes
 const trail = Array(maxTrail).fill(null); // Initialize the trail array
 
 function drawCascadingWave() {
