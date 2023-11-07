@@ -28,26 +28,22 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.beginPath();
+    ctx.fillStyle = '#DE3730';
     let x = 0;
-    for (let i = 0; i < bufferLength; i++) {
-        const value = dataArray[i];
-        const y = (0.5 + value / 255) * canvas.height;
+    const sliceWidth = canvas.width * 1.0 / bufferLength;
 
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-        
-        x += canvas.width / bufferLength;
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * canvas.height / 2;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2, false);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, canvas.height - y, 5, 0, Math.PI * 2, false); // Reflection
+        ctx.fill();
+
+        x += sliceWidth;
     }
-    ctx.strokeStyle = '#DE3730';
-    ctx.stroke();
-    ctx.save();
-    ctx.scale(1, -1); // Flip to create a reflection
-    ctx.translate(0, -canvas.height);
-    ctx.stroke(); // Draw the reflection
-    ctx.restore();
 }
-draw();
