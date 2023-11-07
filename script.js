@@ -28,15 +28,19 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const pixelSize = 5; // Size of the 'pixel' squares
+    const radius = 2; // Radius of the dots
     ctx.fillStyle = '#DE3730';
     dataArray.forEach((value, i) => {
         const percent = value / 255;
-        const y = (canvas.height / 2) + (canvas.height / 2) * percent - (pixelSize / 2);
+        const y = (canvas.height / 2) + (canvas.height / 2) * percent - radius;
         const x = (i / bufferLength) * canvas.width;
 
-        ctx.fillRect(x, y, pixelSize, pixelSize);
-        ctx.fillRect(x, canvas.height - y, pixelSize, pixelSize); // Reflection
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x, canvas.height - y, radius, 0, Math.PI * 2); // Reflection
+        ctx.fill();
     });
 }
 draw();
