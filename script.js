@@ -27,15 +27,17 @@ function drawCascadingWave() {
     trail.unshift(new Uint8Array(dataArray)); // Add new data to the start of the trail array
     if (trail.length > maxTrail) trail.pop(); // Remove the oldest data if we exceed the maximum trail length
 
-    ctx.fillStyle = '#F0E7DE';
+    ctx.fillStyle = '#F0E7DE'; // Background color
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw each frame of the trail, with each one being more transparent and lighter in color
     trail.forEach((frame, index) => {
         const alpha = (1 - index / maxTrail).toFixed(2);
-        const colorValue = 255 - (index / maxTrail) * 60; // Making it lighter
-        ctx.strokeStyle = `rgba(220, ${colorValue}, ${colorValue}, ${alpha})`;
-        ctx.lineWidth = 10;
+        const redValue = 220 - (index / maxTrail) * 30; // Red component slightly decreases
+        const greenValue = Math.max(0, 50 - (index / maxTrail) * 50); // Green starts low and fades out
+        const blueValue = Math.max(0, 30 - (index / maxTrail) * 30); // Blue starts very low and fades out
+        ctx.strokeStyle = `rgba(${redValue}, ${greenValue}, ${blueValue}, ${alpha})`;
+        ctx.lineWidth = 10; // Width of the waveform lines
 
         ctx.beginPath();
 
