@@ -26,75 +26,19 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#DE3730';
+    ctx.fillStyle = '#DE3730';
+    ctx.globalCompositeOperation = 'lighter'; // Creates a 'blobby' effect
 
-    ctx.beginPath();
+    dataArray.forEach((value, i) => {
+        const percent = value / 255;
+        const height = canvas.height * percent;
+        const offset = canvas.height - height - 1;
+        const barWidth = canvas.width / bufferLength;
 
-    let sliceWidth = canvas.width / bufferLength;
-    let x = 0;
-
-    for (let i = 0; i < bufferLength; i++) {
-        let v = dataArray[i] / 128.0; // Uint8Array data ranges from 0 to 255
-        let y = v * canvas.height / 2;
-
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-
-        x += sliceWidth;
-    }
-
-    ctx.lineTo(canvas.width, canvas.height / 2);
-    ctx.stroke();
-
-    // Store the image data
-    let canvasImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    waveformHistory.push(canvasImage);
-
-    // Only keep enough data to fill the canvas
-    if (waveformHistory.length > canvas.width) {
-        waveformHistory.shift();
-    }
-
-    // Display the waveform history as a scrolling background
-    waveformHistory.forEach((imageData, index) => {
-        ctx.putImageData(imageData, index - waveformHistory.length, 0);
+        ctx.fillRect(i * barWidth, offset, barWidth, height);
+        ctx.fillRect(i * barWidth, canvas.height - offset, barWidth, -height);
     });
+
+    ctx.globalCompositeOperation = 'source-over'; // Reset composite operation
 }
-
-playButton.addEventListener('click', function() {
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-    
-    if (audio.paused) {
-        audio.play();
-        playButton.textContent = 'Pause';
-    } else {
-        audio.pause();
-        playButton.textContent = 'Play';
-    }
-});
-
-audio.addEventListener('timeupdate', function() {
-    const currentTime = audio.currentTime;
-    const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
-    const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');
-    timeCounter.textContent = `• ${minutes}:${seconds}`;
-});
-
-audio.addEventListener('ended', function() {
-    playButton.textContent = 'Play';
-    // Reset waveform history
-    waveformHistory.length = 0;
-});
-
-audio.addEventListener('error', function(e) {
-    console.error('Error encountered:', e);
-});
-
-// Call draw function to initialize the visualization
 draw();
