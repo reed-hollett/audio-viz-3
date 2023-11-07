@@ -28,19 +28,26 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const radius = 2; // Radius of the dots
-    ctx.fillStyle = '#DE3730';
-    dataArray.forEach((value, i) => {
-        const percent = value / 255;
-        const y = (canvas.height / 2) + (canvas.height / 2) * percent - radius;
-        const x = (i / bufferLength) * canvas.width;
+    ctx.beginPath();
+    let x = 0;
+    for (let i = 0; i < bufferLength; i++) {
+        const value = dataArray[i];
+        const y = (0.5 + value / 255) * canvas.height;
 
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(x, canvas.height - y, radius, 0, Math.PI * 2); // Reflection
-        ctx.fill();
-    });
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+        
+        x += canvas.width / bufferLength;
+    }
+    ctx.strokeStyle = '#DE3730';
+    ctx.stroke();
+    ctx.save();
+    ctx.scale(1, -1); // Flip to create a reflection
+    ctx.translate(0, -canvas.height);
+    ctx.stroke(); // Draw the reflection
+    ctx.restore();
 }
 draw();
