@@ -53,7 +53,7 @@ function drawSinusoidal() {
   ctx.save();
   ctx.translate(0, canvas.height);
   ctx.scale(1, -1);
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 20;
   ctx.strokeStyle = '#DE3730';
   ctx.stroke();
   ctx.restore();
