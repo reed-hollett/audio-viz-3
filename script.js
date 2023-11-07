@@ -17,41 +17,47 @@ const dataArray = new Uint8Array(bufferLength);
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight * 0.8;
 
-function drawGradientWave() {
-    requestAnimationFrame(drawGradientWave);
+const maxTrail = 10; // Maximum number of trailing strokes
+const trail = Array(maxTrail).fill(null); // Initialize the trail array
+
+function drawCascadingWave() {
+    requestAnimationFrame(drawCascadingWave);
 
     analyser.getByteTimeDomainData(dataArray);
+    trail.unshift(new Uint8Array(dataArray)); // Add new data to the start of the trail array
+    if (trail.length > maxTrail) trail.pop(); // Remove the oldest data if we exceed the maximum trail length
 
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-    gradient.addColorStop(0, 'red');
-    gradient.addColorStop(1, 'burgundy');
+    // Draw each frame of the trail, with each one being more transparent and lighter in color
+    trail.forEach((frame, index) => {
+        const alpha = (1 - index / maxTrail).toFixed(2);
+        const colorValue = 255 - (index / maxTrail) * 60; // Making it lighter
+        ctx.strokeStyle = `rgba(220, ${colorValue}, ${colorValue}, ${alpha})`;
+        ctx.lineWidth = 2;
 
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = gradient;
+        ctx.beginPath();
 
-    ctx.beginPath();
+        let sliceWidth = canvas.width * 1.0 / bufferLength;
+        let x = 0;
 
-    let sliceWidth = canvas.width * 1.0 / bufferLength;
-    let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+            const v = frame[i] / 128.0;
+            let y = v * canvas.height / 2;
 
-    for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        let y = v * canvas.height / 2;
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
 
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
+            x += sliceWidth;
         }
 
-        x += sliceWidth;
-    }
-
-    ctx.lineTo(canvas.width, canvas.height / 2);
-    ctx.stroke();
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+    });
 }
 
 function updateTime() {
@@ -68,7 +74,7 @@ playButton.addEventListener('click', () => {
 
     if (audio.paused) {
         audio.play();
-        drawGradientWave();
+        drawCascadingWave();
     } else {
         audio.pause();
     }
@@ -90,8 +96,8 @@ audio.addEventListener('error', (e) => {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight * 0.8;
-    drawGradientWave();
+    drawCascadingWave();
 });
 
-// Start the visualizer with the gradient effect
-drawGradientWave();
+// Start the visualizer with the cascading effect
+drawCascadingWave();
