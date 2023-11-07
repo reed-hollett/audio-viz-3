@@ -1,67 +1,53 @@
-const audio = document.getElementById('audio');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const playButton = document.getElementById('playButton');
-const timeCounter = document.getElementById('timeCounter');
-
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const analyser = audioContext.createAnalyser();
-const source = audioContext.createMediaElementSource(audio);
-source.connect(analyser);
-analyser.connect(audioContext.destination);
-
-analyser.fftSize = 256;
-const bufferLength = analyser.frequencyBinCount;
-const dataArray = new Uint8Array(bufferLength);
-
-canvas.width = document.querySelector('.container').clientWidth - 32;
-canvas.height = window.innerHeight * 0.8;
-
-const history = [];
-
 function draw() {
     requestAnimationFrame(draw);
     analyser.getByteFrequencyData(dataArray);
-    const averageVolume = dataArray.reduce((a, b) => a + b) / dataArray.length;
-    history.push(averageVolume);
 
-    const barWidth = 20;  // Increased thickness of lines
-    const barSpacing = 8;
-    const totalBarSpace = barWidth + barSpacing;
+    // Clear the canvas for each frame
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (history.length > (canvas.width * 0.65) / totalBarSpace) history.shift();
+    // Center the circle in the middle of the canvas
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(canvas.width, canvas.height) / 3; // adjust radius here
 
-    ctx.fillStyle = '#F0E7DE';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Calculate the slice width of each segment of the circle
+    const sliceWidth = (Math.PI * 2) / bufferLength;
 
-    ctx.fillStyle = '#FD8775';
-    ctx.lineCap = 'round';  // Rounded endpoints
+    ctx.lineWidth = 2; // Width of the circle lines
 
-    for (let h = 0; h < history.length; h++) {
-        const x = h * totalBarSpace;
-        const height = (history[h] / 256) * canvas.height;
-        const halfHeight = height / 2;
-        const y = canvas.height / 2;
+    // Begin drawing the circular visualization
+    ctx.beginPath();
 
-        ctx.fillRect(x, y - halfHeight, barWidth, halfHeight);
-        ctx.fillRect(x, y, barWidth, halfHeight);
+    for (let i = 0; i < bufferLength; i++) {
+        const value = dataArray[i] / 255;
+        const barLength = radius * value; // Scale the bar length with the audio value
+
+        // Calculate the angle for this segment
+        const angle = sliceWidth * i;
+
+        // Convert polar coordinates (angle, length) to Cartesian coordinates (x, y)
+        const x = centerX + Math.cos(angle) * barLength;
+        const y = centerY + Math.sin(angle) * barLength;
+
+        // Draw a line segment from the center of the circle outwards
+        if (i === 0) {
+            ctx.moveTo(x, y); // Move to starting point without drawing a line
+        } else {
+            ctx.lineTo(x, y); // Draw line to this point
+        }
     }
+
+    // Close the path to create a complete circle
+    ctx.closePath();
+
+    // Set the color of the circle
+    ctx.strokeStyle = '#FD8775';
+    ctx.stroke(); // Apply the stroke to the path
+
+    // Optionally, you can fill the circle with a color
+    ctx.fillStyle = 'rgba(253, 135, 117, 0.2)'; // Semi-transparent fill
+    ctx.fill(); // Fill the path
 }
 
-playButton.addEventListener('click', function() {
-    audioContext.resume().then(() => {
-        audio.play();
-        draw();
-    });
-});
-
-audio.addEventListener('timeupdate', function() {
-    const currentTime = audio.currentTime;
-    const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
-    const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');
-    timeCounter.textContent = `• ${minutes}:${seconds}`;
-});
-
-audio.addEventListener('error', function(e) {
-    console.error('Error encountered:', e);
-});
+// Call the draw function to start the visualization
+draw();
