@@ -35,7 +35,7 @@ function drawCascadingWave() {
         const alpha = (1 - index / maxTrail).toFixed(2);
         const colorValue = 255 - (index / maxTrail) * 60; // Making it lighter
         ctx.strokeStyle = `rgba(220, ${colorValue}, ${colorValue}, ${alpha})`;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 10;
 
         ctx.beginPath();
 
