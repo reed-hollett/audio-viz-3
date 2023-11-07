@@ -10,55 +10,54 @@ const source = audioContext.createMediaElementSource(audio);
 source.connect(analyser);
 analyser.connect(audioContext.destination);
 
-analyser.fftSize = 256;
+analyser.fftSize = 2048; // Use a larger FFT size for more detailed waveform
 const bufferLength = analyser.frequencyBinCount;
 const dataArray = new Uint8Array(bufferLength);
 
 canvas.width = document.querySelector('.container').clientWidth;
 canvas.height = window.innerHeight * 0.8;
 
+let xOffset = 0; // This offset will control the horizontal scrolling of our waveform
+
 function draw() {
     requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(dataArray);
 
-    // Clear the canvas for each animation frame
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Set the beige background for the circular visualization
-    ctx.fillStyle = '#F0E7DE'; // Beige color
+    analyser.getByteTimeDomainData(dataArray); // Use time domain data for waveform
+
+    ctx.fillStyle = '#F0E7DE'; // Beige background to match the container
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Center of the canvas
-    let centerX = canvas.width / 2;
-    let centerY = canvas.height / 2;
-    let radius = 100;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#DE3730'; // Red waveform
+    ctx.beginPath();
+
+    const sliceWidth = canvas.width * 1.0 / bufferLength;
+    let x = 0; // Start drawing at the beginning of the canvas
 
     for (let i = 0; i < bufferLength; i++) {
-        // Get the frequency value
-        const value = dataArray[i];
-        // Calculate the bar length based on the frequency value
-        const barLength = (value / 255.0) * (canvas.height / 2 - radius);
-        // Set the angle for each bar
-        const angle = (i / bufferLength) * Math.PI * 2;
-        // Calculate x and y for the start and end points of each bar
-        const x1 = centerX + radius * Math.cos(angle);
-        const y1 = centerY + radius * Math.sin(angle);
-        const x2 = centerX + (radius + barLength) * Math.cos(angle);
-        const y2 = centerY + (radius + barLength) * Math.sin(angle);
+        const v = dataArray[i] / 128.0; // 128 is for unsigned 8-bit array
+        const y = v * canvas.height / 2;
 
-        // Create a gradient for the bars
-        const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-        gradient.addColorStop(0, '#ff4500'); // Orange
-        gradient.addColorStop(0.5, '#de3730'); // Red
-        gradient.addColorStop(1, '#800020'); // Burgundy
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
 
-        // Draw the bars
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+        x += sliceWidth;
+    }
+
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+
+    // Create a scrolling effect by translating the canvas
+    xOffset -= 2; // Speed of the scrolling
+    ctx.translate(xOffset, 0);
+
+    // When the waveform scrolls off the canvas, reset translation and start over
+    if (-xOffset >= canvas.width) {
+        xOffset = 0;
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation matrix
     }
 }
 
@@ -86,11 +85,10 @@ audio.addEventListener('timeupdate', function() {
 
 audio.addEventListener('ended', function() {
     playButton.textContent = 'Play';
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation matrix when the song ends
+    xOffset = 0; // Reset offset
 });
 
 audio.addEventListener('error', function(e) {
     console.error('Error encountered:', e);
 });
-
-// Call draw function to initialize the visualization
-draw();
