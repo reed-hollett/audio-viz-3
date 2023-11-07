@@ -20,7 +20,6 @@ canvas.height = window.innerHeight * 0.8;
 const waveformHistory = [];
 
 // ... (setup and event listeners from previous snippets)
-
 function draw() {
     requestAnimationFrame(draw);
     analyser.getByteTimeDomainData(dataArray);
@@ -28,22 +27,39 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#DE3730';
-    let x = 0;
+    ctx.strokeStyle = '#DE3730';
+    ctx.beginPath();
+
     const sliceWidth = canvas.width * 1.0 / bufferLength;
+    let x = 0;
 
     for (let i = 0; i < bufferLength; i++) {
         const v = dataArray[i] / 128.0;
         const y = v * canvas.height / 2;
+        
+        if(i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            let prevX = x - sliceWidth;
+            let prevY = (dataArray[i - 1] / 128.0) * canvas.height / 2;
+            let cpX = (x + prevX) / 2;
+            let cpY = (y + prevY) / 2;
 
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2, false);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(x, canvas.height - y, 5, 0, Math.PI * 2, false); // Reflection
-        ctx.fill();
+            // Create a sinusoidal effect with the control points
+            cpY += (i % 2 === 0) ? 10 : -10;
+            
+            ctx.quadraticCurveTo(cpX, cpY, x, y);
+        }
 
         x += sliceWidth;
     }
+
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+
+    ctx.save();
+    ctx.scale(1, -1); // Flip to draw the reflection
+    ctx.translate(0, -canvas.height);
+    ctx.stroke();
+    ctx.restore();
 }
