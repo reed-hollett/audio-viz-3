@@ -26,19 +26,15 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#DE3730';
-    ctx.globalCompositeOperation = 'lighter'; // Creates a 'blobby' effect
-
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height / 2);
     dataArray.forEach((value, i) => {
-        const percent = value / 255;
-        const height = canvas.height * percent;
-        const offset = canvas.height - height - 1;
-        const barWidth = canvas.width / bufferLength;
-
-        ctx.fillRect(i * barWidth, offset, barWidth, height);
-        ctx.fillRect(i * barWidth, canvas.height - offset, barWidth, -height);
+        const x = (i / bufferLength) * canvas.width;
+        const y = (value / 255) * canvas.height;
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, canvas.height - y); // Reflection
     });
-
-    ctx.globalCompositeOperation = 'source-over'; // Reset composite operation
+    ctx.strokeStyle = '#DE3730';
+    ctx.stroke();
 }
 draw();
