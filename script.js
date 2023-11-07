@@ -10,55 +10,50 @@ const source = audioContext.createMediaElementSource(audio);
 source.connect(analyser);
 analyser.connect(audioContext.destination);
 
-analyser.fftSize = 2048; // Use a larger FFT size for more detailed waveform
+analyser.fftSize = 2048;
 const bufferLength = analyser.frequencyBinCount;
 const dataArray = new Uint8Array(bufferLength);
 
 canvas.width = document.querySelector('.container').clientWidth;
 canvas.height = window.innerHeight * 0.8;
 
-let xOffset = 0; // This offset will control the horizontal scrolling of our waveform
+// Define a history array to keep the last N number of lines
+const history = [];
+const maxHistorySize = canvas.width;
 
 function draw() {
     requestAnimationFrame(draw);
+    analyser.getByteTimeDomainData(dataArray);
 
-    analyser.getByteTimeDomainData(dataArray); // Use time domain data for waveform
+    const sliceWidth = canvas.width * 1.0 / maxHistorySize;
+    let x = 0;
 
-    ctx.fillStyle = '#F0E7DE'; // Beige background to match the container
+    // Add the new slice to the history
+    history.push(new Uint8Array(dataArray));
+    if (history.length > maxHistorySize) {
+        history.shift(); // Remove the oldest slice
+    }
+
+    ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#DE3730'; // Red waveform
-    ctx.beginPath();
+    ctx.strokeStyle = '#DE3730';
 
-    const sliceWidth = canvas.width * 1.0 / bufferLength;
-    let x = 0; // Start drawing at the beginning of the canvas
+    // Draw the accumulated time slices
+    history.forEach(function (slice, index) {
+        ctx.beginPath();
+        let y = (slice[0] / 128.0) * canvas.height / 2;
+        ctx.moveTo(x, y);
 
-    for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0; // 128 is for unsigned 8-bit array
-        const y = v * canvas.height / 2;
-
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
+        for (let i = 1; i < bufferLength; i++) {
+            y = (slice[i] / 128.0) * canvas.height / 2;
             ctx.lineTo(x, y);
+            x += sliceWidth;
         }
 
-        x += sliceWidth;
-    }
-
-    ctx.lineTo(canvas.width, canvas.height / 2);
-    ctx.stroke();
-
-    // Create a scrolling effect by translating the canvas
-    xOffset -= 2; // Speed of the scrolling
-    ctx.translate(xOffset, 0);
-
-    // When the waveform scrolls off the canvas, reset translation and start over
-    if (-xOffset >= canvas.width) {
-        xOffset = 0;
-        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation matrix
-    }
+        ctx.stroke();
+        x = index * sliceWidth; // Set x for the next slice
+    });
 }
 
 playButton.addEventListener('click', function() {
@@ -85,10 +80,11 @@ audio.addEventListener('timeupdate', function() {
 
 audio.addEventListener('ended', function() {
     playButton.textContent = 'Play';
-    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformation matrix when the song ends
-    xOffset = 0; // Reset offset
 });
 
 audio.addEventListener('error', function(e) {
     console.error('Error encountered:', e);
 });
+
+// Call draw function to initialize the visualization
+draw();
