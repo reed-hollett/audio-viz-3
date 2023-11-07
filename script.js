@@ -17,82 +17,81 @@ const dataArray = new Uint8Array(bufferLength);
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight * 0.8;
 
-function drawSinusoidal() {
-  requestAnimationFrame(drawSinusoidal);
+function drawGradientWave() {
+    requestAnimationFrame(drawGradientWave);
 
-  analyser.getByteTimeDomainData(dataArray);
+    analyser.getByteTimeDomainData(dataArray);
 
-  ctx.fillStyle = '#F0E7DE';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#F0E7DE';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = '#DE3730';
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+    gradient.addColorStop(0, 'red');
+    gradient.addColorStop(1, 'burgundy');
 
-  ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = gradient;
 
-  let sliceWidth = canvas.width / bufferLength;
-  let x = 0;
+    ctx.beginPath();
 
-  for (let i = 0; i < bufferLength; i++) {
-    const v = dataArray[i] / 128.0;
-    let y = v * canvas.height / 2;
+    let sliceWidth = canvas.width * 1.0 / bufferLength;
+    let x = 0;
 
-    if (i === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        let y = v * canvas.height / 2;
+
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
     }
 
-    x += sliceWidth;
-  }
-
-  ctx.lineTo(canvas.width, canvas.height / 2);
-  ctx.stroke();
-
-  // Reflect the waveform across the center of the canvas
-  ctx.save();
-  ctx.translate(0, canvas.height);
-  ctx.scale(1, -1);
-  ctx.lineWidth = 20;
-  ctx.strokeStyle = '#DE3730';
-  ctx.stroke();
-  ctx.restore();
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
 }
 
 function updateTime() {
-  const currentTime = audio.currentTime;
-  const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
-  const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');
-  timeCounter.textContent = `• ${minutes}:${seconds}`;
+    const currentTime = audio.currentTime;
+    const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
+    const seconds = (currentTime % 60).toFixed(2).padStart(5, '0');
+    timeCounter.textContent = `• ${minutes}:${seconds}`;
 }
 
 playButton.addEventListener('click', () => {
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
-  }
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 
-  if (audio.paused) {
-    audio.play();
-    drawSinusoidal();
-  } else {
-    audio.pause();
-  }
+    if (audio.paused) {
+        audio.play();
+        drawGradientWave();
+    } else {
+        audio.pause();
+    }
 
-  playButton.textContent = audio.paused ? 'Play' : 'Pause';
+    playButton.textContent = audio.paused ? 'Play' : 'Pause';
 });
 
 audio.addEventListener('timeupdate', updateTime);
 
 audio.addEventListener('ended', () => {
-  playButton.textContent = 'Play';
+    playButton.textContent = 'Play';
 });
 
 audio.addEventListener('error', (e) => {
-  console.error('Error with the audio file:', e);
+    console.error('Error with the audio file:', e);
 });
 
-// Make sure to resize the canvas when the window resizes
+// Resize the canvas to fill browser window dynamically
 window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight * 0.8;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight * 0.8;
+    drawGradientWave();
 });
+
+// Start the visualizer with the gradient effect
+drawGradientWave();
