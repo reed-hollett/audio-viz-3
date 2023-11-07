@@ -19,6 +19,8 @@ canvas.height = window.innerHeight * 0.8;
 
 const waveformHistory = [];
 
+// ... (setup and event listeners from previous snippets)
+
 function draw() {
     requestAnimationFrame(draw);
     analyser.getByteTimeDomainData(dataArray);
@@ -26,15 +28,15 @@ function draw() {
     ctx.fillStyle = '#F0E7DE';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height / 2);
+    const pixelSize = 5; // Size of the 'pixel' squares
+    ctx.fillStyle = '#DE3730';
     dataArray.forEach((value, i) => {
+        const percent = value / 255;
+        const y = (canvas.height / 2) + (canvas.height / 2) * percent - (pixelSize / 2);
         const x = (i / bufferLength) * canvas.width;
-        const y = (value / 255) * canvas.height;
-        ctx.lineTo(x, y);
-        ctx.lineTo(x, canvas.height - y); // Reflection
+
+        ctx.fillRect(x, y, pixelSize, pixelSize);
+        ctx.fillRect(x, canvas.height - y, pixelSize, pixelSize); // Reflection
     });
-    ctx.strokeStyle = '#DE3730';
-    ctx.stroke();
 }
 draw();
