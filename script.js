@@ -1,53 +1,80 @@
+const audio = document.getElementById('audio');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const playButton = document.getElementById('playButton');
+const timeCounter = document.getElementById('timeCounter');
+
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const analyser = audioContext.createAnalyser();
+const source = audioContext.createMediaElementSource(audio);
+source.connect(analyser);
+analyser.connect(audioContext.destination);
+
+analyser.fftSize = 256;
+const bufferLength = analyser.frequencyBinCount;
+const dataArray = new Uint8Array(bufferLength);
+
+canvas.width = document.querySelector('.container').clientWidth;
+canvas.height = window.innerHeight * 0.8;
+
 function draw() {
     requestAnimationFrame(draw);
     analyser.getByteFrequencyData(dataArray);
 
-    // Clear the canvas for each frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Slight canvas fade effect
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Center the circle in the middle of the canvas
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(canvas.width, canvas.height) / 3; // adjust radius here
-
-    // Calculate the slice width of each segment of the circle
-    const sliceWidth = (Math.PI * 2) / bufferLength;
-
-    ctx.lineWidth = 2; // Width of the circle lines
-
-    // Begin drawing the circular visualization
-    ctx.beginPath();
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
+    let radius = 100;
 
     for (let i = 0; i < bufferLength; i++) {
-        const value = dataArray[i] / 255;
-        const barLength = radius * value; // Scale the bar length with the audio value
+        const value = dataArray[i];
+        const barLength = (value / 255) * (canvas.height / 2);
+        const angle = (i / bufferLength) * Math.PI * 2;
 
-        // Calculate the angle for this segment
-        const angle = sliceWidth * i;
+        const x1 = centerX + radius * Math.cos(angle);
+        const y1 = centerY + radius * Math.sin(angle);
+        const x2 = centerX + (radius + barLength) * Math.cos(angle);
+        const y2 = centerY + (radius + barLength) * Math.sin(angle);
 
-        // Convert polar coordinates (angle, length) to Cartesian coordinates (x, y)
-        const x = centerX + Math.cos(angle) * barLength;
-        const y = centerY + Math.sin(angle) * barLength;
+        ctx.strokeStyle = `hsl(${(value / 255.0) * 360}, 100%, 50%)`;
+        ctx.lineWidth = 2;
 
-        // Draw a line segment from the center of the circle outwards
-        if (i === 0) {
-            ctx.moveTo(x, y); // Move to starting point without drawing a line
-        } else {
-            ctx.lineTo(x, y); // Draw line to this point
-        }
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
     }
-
-    // Close the path to create a complete circle
-    ctx.closePath();
-
-    // Set the color of the circle
-    ctx.strokeStyle = '#FD8775';
-    ctx.stroke(); // Apply the stroke to the path
-
-    // Optionally, you can fill the circle with a color
-    ctx.fillStyle = 'rgba(253, 135, 117, 0.2)'; // Semi-transparent fill
-    ctx.fill(); // Fill the path
 }
 
-// Call the draw function to start the visualization
-draw();
+playButton.addEventListener('click', function() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    if (audio.paused) {
+        audio.play();
+        playButton.textContent = 'Pause';
+        draw();
+    } else {
+        audio.pause();
+        playButton.textContent = 'Play';
+    }
+});
+
+audio.addEventListener('timeupdate', function() {
+    const currentTime = audio.currentTime;
+    const minutes = Math.floor(currentTime / 60).toString().padStart(2, '0');
+    const seconds = (currentTime % 60).toFixed(1).padStart(4, '0');
+    timeCounter.textContent = `• ${minutes}:${seconds}`;
+});
+
+audio.addEventListener('ended', () => {
+    playButton.textContent = 'Play';
+});
+
+audio.addEventListener('error', function(e) {
+    console.error('Error encountered:', e);
+});
